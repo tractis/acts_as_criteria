@@ -1,0 +1,25 @@
+=  acts_as_criteria
+
+= Example
+
+In model:
+class Post < ActiveRecord::Base
+  belongs_to :user
+  acts_as_taggable_on :tags  
+  acts_as_criteria :named  => :search,
+                   :simple => { :columns => [:name, :body], :match => :contains },
+                   :filter => { :columns => { :name => {},
+                                              :comment_count => {},
+                                              :is_published => {},
+                                              :created_at => {},
+                                              :"tags.name" => { :source => lambda { |options| Tag.all.map { |tag| [tag.name, tag.id] } } } } }
+end
+
+In view:
+  <%= acts_as_criteria_form :simple, Post, :advanced => true, :advanced_mantain_simple => true %>
+  <%= acts_as_criteria_form :filter, Post, :hidden => true %> 
+  
+  
+And you have a full-featured simple search and advanced filter system
+
+If you have installed http://electronicholas.com/calendar the filters for date columns will use this.
