@@ -9,13 +9,26 @@ module ActsAsCriteria
       named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
       
       if params[:query] && model.respond_to?(:criteria_options)
-        if model.criteria_options[:paginate].blank?
-          instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]))
+        if model.criteria_options[:restrict].blank?
+          if model.criteria_options[:paginate].blank?
+            instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]))
+          else
+            paginate = model.criteria_options[:paginate]
+            pages = paginate[:options].call(@current_user)
+            instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
+          end
         else
-          paginate = model.criteria_options[:paginate]
-          pages = paginate[:options].call(pages)
-          instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
+          restrict = model.criteria_options[:restrict]
+          perms = restrict[:options].call(@current_user)
+          if model.criteria_options[:paginate].blank?
+            instance_variable_set("@#{controller_name}", model.send(:"#{restrict[:method]}", perms).send(:"#{named}", params[:query]))
+          else
+            paginate = model.criteria_options[:paginate]
+            pages = paginate[:options].call(@current_user)
+            instance_variable_set("@#{controller_name}", model.send(:"#{restrict[:method]}", perms).send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
+          end          
         end
+        
         instance_variable_set("@current_query", params[:query])
 
         respond_to do |format|
