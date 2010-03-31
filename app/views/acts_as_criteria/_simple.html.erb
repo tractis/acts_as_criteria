@@ -1,12 +1,16 @@
 <div id="criteria_simple" class="<%= options[:class] %>">  
   <% form_tag multi == true ? options[:actions][0].last : options[:action], :method => options[:method], :class => options[:class] do -%>
-	<%= text_field_tag(:query, @current_query, :id => nil) %>
+	<%= text_field_tag("query", @current_query, :size => options[:size] || 25 ) %>
 	<%- if multi == true %>	
 		<%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
 	<%- end %>
 	<%- if options[:advanced] == true %>
 		<%= link_to_remote "Advanced", :url => { :action => :criteria, :id => "filter" } %>
-	<%- end%>
-	<%= submit_tag options[:label] %>
+	<%- end %>
+	<%- if options[:live].blank? %>
+		<%= submit_tag options[:label] %>
+	<%- else %>
+		<%= observe_field("query", :frequency => options[:live][:frequency], :function => options[:live][:trigger]) %>
+	<%- end %>
   <% end -%>
 </div>
