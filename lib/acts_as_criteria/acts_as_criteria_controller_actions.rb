@@ -9,7 +9,13 @@ module ActsAsCriteria
       named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
       
       if params[:query] && model.respond_to?(:criteria_options)
-        instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]))
+        if model.criteria_options[:paginate].blank?
+          instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]))
+        else
+          paginate = model.criteria_options[:paginate]
+          pages = paginate[:options].call(pages)
+          instance_variable_set("@#{controller_name}", model.send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
+        end
         instance_variable_set("@current_query", params[:query])
 
         respond_to do |format|
