@@ -2,10 +2,15 @@
   <% form_tag multi == true ? options[:actions][0].last : options[:action], :method => options[:method], :class => options[:class] do -%>
 	<%= text_field_tag("query", @current_query, :size => options[:size] || 25 ) %>
 	<%- if multi == true %>	
-		<%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
+	  <%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
 	<%- end %>
-	<%- if options[:advanced] == true %>
-		<%= link_to_remote "Advanced", :url => { :action => :criteria, :id => "filter" } %>
+	<%- unless options[:advanced].blank? %>
+	  <%- unless options[:advanced][:text].blank? %>
+		<%= link_to_remote options[:advanced][:text], :url => { :action => :criteria, :id => "filter" } %>
+	  <%- end %>
+	  <%- unless options[:advanced][:image].blank? %>
+		<%= link_to_remote image_tag(options[:advanced][:image]), :url => { :action => :criteria, :id => "filter" } %>
+	  <%- end %>	  
 	<%- end %>
 	<%- if options[:live].blank? %>
 		<%= submit_tag options[:label] %>

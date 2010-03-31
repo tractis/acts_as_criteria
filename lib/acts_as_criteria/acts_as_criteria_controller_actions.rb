@@ -28,7 +28,7 @@ module ActsAsCriteria
             instance_variable_set("@#{controller_name}", model.send(:"#{restrict[:method]}", perms).send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
           end          
         end
-        
+
         instance_variable_set("@current_query", params[:query])
 
         respond_to do |format|
