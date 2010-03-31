@@ -1,5 +1,5 @@
 <li id="filter_<%= @filter[:col_name] %>">
-	<%= @filter[:col_name] %>	
+	<%= @filter[:col_text] %>	
 	<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name]) %>
 	<%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
 		<%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name]) %>

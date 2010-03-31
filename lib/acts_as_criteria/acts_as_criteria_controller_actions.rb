@@ -5,6 +5,7 @@ module ActsAsCriteria
     # Only search If the model activates the acts_as_criteria plugin
     #----------------------------------------------------------------------------
     def search
+      #require 'ruby-debug';debugger
       model = controller_name.singularize.camelize.constantize
       named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
       
@@ -28,9 +29,16 @@ module ActsAsCriteria
             instance_variable_set("@#{controller_name}", model.send(:"#{restrict[:method]}", perms).send(:"#{named}", params[:query]).send(:"#{paginate[:method]}", pages))
           end          
         end
-
+        
+        # Set @current_query
         instance_variable_set("@current_query", params[:query])
-
+        
+        # Mantain current_query state if option given 
+        unless model.criteria_options[:mantain_current_query].blank?
+          model.criteria_options[:mantain_current_query].call(params[:query], controller_name, session)
+        end
+        
+        
         respond_to do |format|
           format.html { render :action => :index }
           format.js   { render :action => :index }
@@ -47,7 +55,7 @@ module ActsAsCriteria
     def criteria
       model = controller_name.singularize.camelize.constantize
       #named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
-      columns = model.criteria_options[:filter][:columns].map { |col, val| col }.insert(0, 'Select field')
+      columns = model.criteria_options[:filter][:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, model.criteria_options[:sel_text] || "Select field")
       locals = {}
       case params[:id]
         when "filter"
@@ -56,7 +64,7 @@ module ActsAsCriteria
           action = "acts_as_criteria/activate_simple"
         when "fill_empty"
           col_name = params[:col_name]
-          @filter = { :col_name => col_name, :col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
+          @filter = { :col_name => col_name, :col_text => model.criteria_options[:filter][:columns][:"#{col_name}"][:text] || col_name,:col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
           action = "acts_as_criteria/fill_filter_row_empty"
         when "new_empty"
           locals = { :columns => columns }
