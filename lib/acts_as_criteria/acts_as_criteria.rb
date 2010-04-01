@@ -6,7 +6,10 @@ module ActsAsCriteria
     options = args.extract_options!
     simple_options = options[:simple]
     filter_options = options[:filter]
-    columns = options[:columns]
+    # Check for others plugins adding filters    
+    #Dir.foreach("#{RAILS_ROOT}/vendor/plugin") {|dir| load "#{dir}/config/acts_as_criteria.rb" if File.exist("#{dir}/config/acts_as_criteria.rb") }
+
+    #columns = options[:columns]
 
     # defaults
     simple_options[:match] ||= :start
@@ -22,6 +25,10 @@ module ActsAsCriteria
     }
   end
   
+  def criteria_filter_plugin(model, filter)
+    
+  end
+  
   def filter(terms, options)
     terms[:connector] ||= "AND"    
     conds, assocs  = [], []
@@ -35,7 +42,7 @@ module ActsAsCriteria
     end
     
     conditions = merge_conditions(*conds.join(" #{terms[:connector]} "))
-    #require 'ruby-debug';debugger
+    
     { :conditions => conditions, :include => assocs }
   end
 
@@ -58,33 +65,24 @@ module ActsAsCriteria
   end
   
   def get_pattern(col, term) 
-    self.send(:"get_#{col_subtype(col).to_s}_pattern", term)
-#    case col_type(col)
-#      when :string, :text
-#        then get_text_pattern(term)
-#      when :integer, :float, :decimal
-#        then get_num_pattern(term)
-#      when :datetime, :timestamp, :time, :date
-#        then get_period_pattern(term)
-#      when :boolean
-#        then get_bool_pattern(term)
-#    end    
+    self.send(:"get_#{col_subtype(col).to_s}_pattern", term)   
   end
   
   def get_text_pattern(term)
     term[:match] ||= :contains
     like = connection.adapter_name == "PostgreSQL" ? "ILIKE" : "LIKE"
-    negation = term[:negation] ? "NOT " : ""
     
     case term[:match].to_sym
       when :exact
-        term[:negation] ? "!= '#{term[:value]}'" : "= '#{term[:value]}'"
+        "= '#{term[:value]}'"
       when :start
-        "#{negation}#{like} '#{term[:value]}%'"
+        "#{like} '#{term[:value]}%'"
       when :contains
-        "#{negation}#{like} '%#{term[:value]}%'"
+        "#{like} '%#{term[:value]}%'"
+      when :not_contains
+        "NOT #{like} '%#{term[:value]}%'"        
       when :end
-        "#{negation}#{like} '%#{term[:value]}'"
+        "#{like} '%#{term[:value]}'"
       else
         raise "Unexpected match type: #{term[:match]}"
     end     

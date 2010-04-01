@@ -2,6 +2,10 @@
 
 IMPORTANT: This plugin is under development, not ready for general use
 
+= Configuration
+environment.rb
+
+ config.plugins = [ :all, :acts_as_criteria ] 
 
 = Example
 

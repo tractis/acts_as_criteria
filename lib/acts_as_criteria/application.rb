@@ -1,5 +1,5 @@
 module ActsAsCriteria 
-  module ControllerActions
+  module ApplicationController
     
     # Controller instance method that responds to /controller/search request.
     # Only search If the model activates the acts_as_criteria plugin
@@ -71,7 +71,11 @@ module ActsAsCriteria
           action = "acts_as_criteria/new_filter_row_empty"
         when "clear"
           locals = { :columns => columns }
-          action = "acts_as_criteria/clear_filter"
+          instance_variable_set("@current_query", nil)
+          unless model.criteria_options[:mantain_current_query].blank?
+            model.criteria_options[:mantain_current_query].call(nil, controller_name, session)
+          end          
+          action = "acts_as_criteria/clear_filter"    
       end
       
       respond_to do |format|

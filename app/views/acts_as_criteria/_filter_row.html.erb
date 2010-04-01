@@ -1,10 +1,13 @@
+<%- no_more ||= false %>
 <li id="filter_<%= @filter[:col_name] %>">
 	<%= @filter[:col_text] %>	
-	<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name]) %>
+	<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name], @current_query, @filter[:col_options]) %>
 	<%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
-		<%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name]) %>
+	  <%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name], @current_query) %>
 	<%- else %>
-		<%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source]) %>
+	  <%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source], @current_query) %>
 	<%- end %>
-	<%= link_to_remote("More", {:url => { :action => :criteria, :id => "new_empty" }}, {:id => "criteria_filter_more"}) %>
+	<%- unless no_more %>
+	  <%= link_to_remote("More", {:url => { :action => :criteria, :id => "new_empty" }}, {:id => "criteria_filter_more"}) %>
+	<%- end %>
 </li>

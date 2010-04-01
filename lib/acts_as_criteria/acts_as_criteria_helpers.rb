@@ -40,42 +40,81 @@ module ActsAsCriteria
       render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => filters[:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, model.criteria_options[:sel_text] || "Select field") }      
     end
     
-    def acts_as_criteria_input_operator(col_subtype, col)
+    def acts_as_criteria_input_operator(col_subtype, col, current_query, col_options)      
+      current_match = (current_query.blank? || current_query[col].blank? || current_query[col][:match].blank?) ? "" : current_query[col][:match]
+      
       case col_subtype
-        when :text
-          then select_tag :"query[#{col}][match]", "<option>contains</option><option>start</option><option>end</option><option>exact</option>"
-        when :num, :period
-          then select_tag :"query[#{col}][match]", "<option>eq</option><option>ne</option><option>gt</option><option>ge</option><option>lt</option><option>le</option>"
+        when :text then 
+          if col_options[:source].blank?  
+            opts = [["contains","contains"], ["not contains", "not_contains"], ["start","start"], ["end","end"], ["exact","exact"]]
+          else
+            opts = [["contains","contains"], ["not contains", "not_contains"]]
+          end            
+        when :num, :period then 
+          if col_options[:source].blank?
+            opts = [["=","eq"], ["<>","ne"], [">","gt"], [">=","ge"], ["<","lt"], ["<=","le"]]
+          else
+            opts = [["=","eq"], ["<>","ne"]]
+          end
         when :bool
-          then ""
+          then return ""
         else
           raise "Column subtype not supported: #{col_subtype}"
       end
+      select_tag :"query[#{col}][match]", options_for_select(opts, current_match)
     end
     
-    def acts_as_criteria_input_field(col_subtype, col)
+    def acts_as_criteria_input_field(col_subtype, col, current_query)
+      current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value]
+      
       case col_subtype
         when :text, :num
-          then text_field_tag(:"query[#{col}][value]", @current_query, :id => nil)
+          then text_field_tag(:"query[#{col}][value]", current_value, :id => nil)
         when :period
-          # TODO: calendar_date_select please
           then 
             if self.respond_to? "calendar_date_select_tag"
-              calendar_date_select_tag :"query[#{col}][value]"
+              calendar_date_select_tag(:"query[#{col}][value]", current_value, :id => nil)
             else
-              text_field_tag(:"query[#{col}][value]", @current_query, :id => nil)
+              text_field_tag(:"query[#{col}][value]", current_value, :id => nil)
             end
         when :bool
-          then select_tag :"query[#{col}][value]", "<option>0</option><option>1</option>"
+          then select_tag :"query[#{col}][value]", options_for_select([["False","0"], ["True","1"]], current_value)
         else
           raise "Column subtype not supported: #{col_subtype}"    
       end
     end
     
-    def acts_as_criteria_input_source(col_subtype, col, source)
+    def acts_as_criteria_input_source(col_subtype, col, source, current_query)
+      current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value]
       options = source.call(options)
-      select_tag :"query[#{col}][value]", options_for_select(options)
-    end    
+      select_tag :"query[#{col}][value]", options_for_select(options, current_value.to_i)
+    end
+    
+    def acts_as_criteria_set_visibility(type, current_query, options = nil)
+      none = "style='display:none;'"
+      case type
+        when :simple then
+          return none unless current_query.instance_of?(String)          
+        when :filter then
+          return none if options[:hidden] && !current_query.instance_of?(HashWithIndifferentAccess)
+        else
+          raise "Type not supported: #{type}, use :simple or :filter"
+      end
+      ""
+    end
+    
+    def acts_as_criteria_get_action_link(action, type)
+      if type[:text]
+        link = type[:text]
+      else
+        link = image_tag(type[:image])
+      end
+      link_to_remote link, :url => { :action => :criteria, :id => action }
+    end
+    
+    def acts_as_criteria_is_filter_active(current_query)
+      current_query.instance_of?(HashWithIndifferentAccess)
+    end
   end
  
 end

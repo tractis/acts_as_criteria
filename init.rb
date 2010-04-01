@@ -1,7 +1,9 @@
-require File.dirname(__FILE__) + "/lib/acts_as_criteria.rb"
+require 'acts_as_criteria/acts_as_criteria.rb'
+require 'acts_as_criteria/acts_as_criteria_helpers.rb'
+require 'acts_as_criteria/application.rb'
 
+ActiveRecord::Base.extend(ActsAsCriteria)    
+ActionView::Base.send(:include, ActsAsCriteria::FormHelper)
 config.to_prepare do
-  ActiveRecord::Base.extend(ActsAsCriteria)    
-  ActionView::Base.send(:include, ActsAsCriteria::FormHelper)
-  ApplicationController.send(:include, ActsAsCriteria::ControllerActions)  
+  ApplicationController.send(:include, ActsAsCriteria::ApplicationController)
 end

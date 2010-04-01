@@ -1,27 +1,21 @@
-<div id="criteria_filter" <%= "style='display:none;'" if options[:hidden] %>>
+<div id="criteria_filter" <%= acts_as_criteria_set_visibility(:filter, @current_query, options) %>>
   <% form_tag options[:action], :method => options[:method], :class => options[:class] do -%>  	
   	<ul id="criteria_filter_items">
-		<%= render :partial => "acts_as_criteria/filter_row_empty", :locals => { :columns => columns } %>		
+	  <%- unless acts_as_criteria_is_filter_active(@current_query) %>	
+		<%= render :partial => "acts_as_criteria/filter_row_empty", :locals => { :columns => columns } %>
+	  <%- else %>
+	    <%= render :partial => "acts_as_criteria/filter_row_prepopulated", :locals => { :model => model } %>
+	  <%- end %>		
 	</ul>
   	<div id="criteria_filter_actions">
 		<%= submit_tag options[:label] %>
 
 		<%- unless options[:clear].blank? %>
-		  <%- unless options[:clear][:text].blank? %>
-			<%= link_to_remote options[:clear][:text], :url => { :action => :criteria, :id => "clear" } %>
-		  <%- end %>
-		  <%- unless options[:clear][:image].blank? %>
-			<%= link_to_remote image_tag(options[:clear][:image]), :url => { :action => :criteria, :id => "clear" } %>
-		  <%- end %>	  
+		  <%= acts_as_criteria_get_action_link("clear", options[:clear]) %>	  
 		<%- end %>
 				
 		<%- unless options[:simple].blank? %>
-		  <%- unless options[:simple][:text].blank? %>
-			<%= link_to_remote options[:simple][:text], :url => { :action => :criteria, :id => "simple" } %>
-		  <%- end %>
-		  <%- unless options[:simple][:image].blank? %>
-			<%= link_to_remote image_tag(options[:simple][:image]), :url => { :action => :criteria, :id => "simple" } %>
-		  <%- end %>	  
+		  <%= acts_as_criteria_get_action_link("simple", options[:simple]) %>	  
 		<%- end %>		
 	</div>
   <% end -%>

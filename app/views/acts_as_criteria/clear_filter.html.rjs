@@ -1,1 +1,1 @@
-page.replace_html 'criteria_filter_items', :partial => "acts_as_criteria/filter_row_empty", :locals => { :columns => columns}
+page.redirect_to :action => "index"
