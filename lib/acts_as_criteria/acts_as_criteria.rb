@@ -54,7 +54,7 @@ module ActsAsCriteria
 
   def col_subtype(col)
     col_parts = col.to_s.split(".")
-    col_type = col_parts.count == 1 ? columns_hash["#{col}"].type : col_parts.first.singularize.camelize.constantize.columns_hash["#{col_parts.last}"].type
+    col_type = col_parts.size == 1 ? columns_hash["#{col}"].type : col_parts.first.singularize.camelize.constantize.columns_hash["#{col_parts.last}"].type
     
     case col_type
       when :string, :text
