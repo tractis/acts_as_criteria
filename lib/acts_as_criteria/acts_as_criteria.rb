@@ -1,16 +1,26 @@
 require 'rubygems'
 require 'activerecord'
 
-module ActsAsCriteria  
+module ActsAsCriteria   
   def acts_as_criteria(*args)        
     options = args.extract_options!
     simple_options = options[:simple]
     filter_options = options[:filter]
+    
     # Check for others plugins adding filters    
-    #Dir.foreach("#{RAILS_ROOT}/vendor/plugin") {|dir| load "#{dir}/config/acts_as_criteria.rb" if File.exist("#{dir}/config/acts_as_criteria.rb") }
-
-    #columns = options[:columns]
-
+    plugins_path = "#{RAILS_ROOT}/vendor/plugins"
+    filter_path = "config/criteria_filter.rb"
+    
+    Dir.foreach("#{RAILS_ROOT}/vendor/plugins") do |plugin| 
+      if File.exist?("#{plugins_path}/#{plugin}/#{filter_path}")
+        load "#{plugins_path}/#{plugin}/#{filter_path}"
+        plugin_filters = send("get_#{plugin}_criteria_filters")
+        plugin_filters.each do |filter|
+          filter_options[:columns].merge!(filter[:filters]) if filter[:model] == self
+        end
+      end      
+    end
+    
     # defaults
     simple_options[:match] ||= :start
     options[:named] ||= 'search'    
@@ -23,10 +33,6 @@ module ActsAsCriteria
       return simple(terms, simple_options[:columns], simple_options[:match]) if terms.instance_of? String
       filter(terms, filter_options)
     }
-  end
-  
-  def criteria_filter_plugin(model, filter)
-    
   end
   
   def filter(terms, options)

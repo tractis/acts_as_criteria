@@ -30,3 +30,10 @@ In view:
 And you have a full-featured simple search and advanced filter system
 
 If you have installed http://electronicholas.com/calendar the filters for date columns will use this.
+
+= For plugin developers
+You can extend the filters on your own plugin:
+ - put in vendor/plugins/my_plugin/config/criteria_filter.rb
+def get_my_plugin_criteria_filters
+  [{ :model => Account, :filters => { :"cats.id" => { :text => "Categoria", :source => lambda { |options| Cat.all.map { |cat| [cat.long_name, cat.id] } } } } } ]
+end 
