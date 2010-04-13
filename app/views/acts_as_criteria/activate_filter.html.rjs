@@ -1,2 +1,1 @@
-page.hide "criteria_simple"
 page.show "criteria_filter"

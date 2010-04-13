@@ -1,0 +1,2 @@
+page.insert_html :bottom, 'criteria_filter_items', :partial => "acts_as_criteria/filter_row"
+page["criteria_new_filter"].value = ""

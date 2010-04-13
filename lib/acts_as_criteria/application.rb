@@ -54,22 +54,31 @@ module ActsAsCriteria
     #----------------------------------------------------------------------------    
     def criteria
       model = controller_name.singularize.camelize.constantize
-      #named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
-      columns = model.criteria_options[:filter][:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, model.criteria_options[:sel_text] || "Select field")
+      columns = model.criteria_options[:filter][:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, "")
+      #model.criteria_options[:sel_text]
       locals = {}
+      # TODO: return invalid_action if not params[:id]
       case params[:id]
-        when "filter"
+        when "activate_filters"
           action = "acts_as_criteria/activate_filter"
-        when "simple"
+        when "activate_simple"
           action = "acts_as_criteria/activate_simple"
-        when "fill_empty"
-          col_name = params[:col_name]
-          @filter = { :col_name => col_name, :col_text => model.criteria_options[:filter][:columns][:"#{col_name}"][:text] || col_name,:col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
-          action = "acts_as_criteria/fill_filter_row_empty"
-        when "new_empty"
-          locals = { :columns => columns }
-          action = "acts_as_criteria/new_filter_row_empty"
-        when "clear"
+        when "new_filter_row"
+           unless params[:col_name].blank? 
+              col_name = params[:col_name]
+              @filter = { :col_name => col_name, :col_text => model.criteria_options[:filter][:columns][:"#{col_name}"][:text] || col_name,:col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
+              action = "acts_as_criteria/new_filter_row"
+          else
+            action = "acts_as_criteria/invalid_action"
+          end
+        when "destroy_filter_row"
+          unless params[:col_name].blank?
+            locals = { :col_name => params[:col_name] }
+            action = "acts_as_criteria/destroy_filter_row"
+          else
+            action = "acts_as_criteria/invalid_action"
+          end
+        when "clear_filters"
           locals = { :columns => columns }
           instance_variable_set("@current_query", nil)
           unless model.criteria_options[:mantain_current_query].blank?

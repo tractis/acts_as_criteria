@@ -1,13 +1,19 @@
-<%- no_more ||= false %>
-<li id="filter_<%= @filter[:col_name] %>">
-	<%= @filter[:col_text] %>	
-	<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name], @current_query, @filter[:col_options]) %>
-	<%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
-	  <%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name], @current_query) %>
-	<%- else %>
-	  <%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source], @current_query) %>
-	<%- end %>
-	<%- unless no_more %>
-	  <%= link_to_remote("More", {:url => { :action => :criteria, :id => "new_empty" }}, {:id => "criteria_filter_more"}) %>
-	<%- end %>
-</li>
+<div id="filter_<%= @filter[:col_name] %>">
+	<div style = "width: 3px; float: left; display : table-cell;">
+		<%= link_to_remote("-", {:url => { :action => :criteria, :id => "destroy_filter_row", :col_name => "filter_#{@filter[:col_name]}" }}) %>
+	</div>	
+	<div style = "width: 90px; text-align: right; float: left; vertical-align : middle; display : table-cell; ">
+		<%= @filter[:col_text] %>
+	</div>
+	<div style = "width: 120px; text-align: right; float: left; display : table-cell;">
+		<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name], @current_query, @filter[:col_options]) %>
+	</div>
+	<div style = "width: 90px; float: left; display : table-cell;">
+		<%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
+		  <%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name], @current_query) %>
+		<%- else %>
+		  <%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source], @current_query) %>
+		<%- end %>
+	</div>
+	<div style = "clear: both;"></div>
+</div>

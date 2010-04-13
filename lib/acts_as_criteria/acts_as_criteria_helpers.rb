@@ -37,7 +37,7 @@ module ActsAsCriteria
       options[:action] ||= self.send("search_#{model.to_s.downcase.pluralize}_path")
       options[:label] ||= "Filter"
       
-      render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => filters[:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, model.criteria_options[:sel_text] || "Select field") }      
+      render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => filters[:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, "") }      
     end
     
     def acts_as_criteria_input_operator(col_subtype, col, current_query, col_options)      
@@ -91,16 +91,24 @@ module ActsAsCriteria
     end
     
     def acts_as_criteria_set_visibility(type, current_query, options = nil)
-      none = "style='display:none;'"
       case type
         when :simple then
-          return none unless current_query.instance_of?(String)          
+          # Disabling the simple search input if query active and is not a string (is a filter)
+          if current_query.instance_of?(String)
+            return false
+          else
+            return true
+          end
         when :filter then
-          return none if options[:hidden] && !current_query.instance_of?(HashWithIndifferentAccess)
+          # Hide the filters form if hidden option is set and active query is not a filter
+          if options[:hidden] && !current_query.instance_of?(HashWithIndifferentAccess)
+            return "style='display:none;'"
+          else
+            return ""
+          end
         else
           raise "Type not supported: #{type}, use :simple or :filter"
       end
-      ""
     end
     
     def acts_as_criteria_get_action_link(action, type)
