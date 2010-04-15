@@ -1,6 +1,6 @@
 <div id="criteria_filter" <%= acts_as_criteria_set_visibility(:filter, @current_query, options) %>>
   <% form_tag options[:action], :method => options[:method], :class => options[:class] do -%>  	
-  	<div id="criteria_filter_items" style = "display: table; width: 450px;">
+  	<div id="criteria_filter_items" style = "display: table; width: 480px;">
 		<%- if acts_as_criteria_is_filter_active(@current_query) %>
 			<%= render :partial => "acts_as_criteria/filter_row_prepopulated", :locals => { :model => model } %>
 		<%- end %>	

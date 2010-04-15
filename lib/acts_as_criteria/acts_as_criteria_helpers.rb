@@ -65,6 +65,7 @@ module ActsAsCriteria
     end
     
     def acts_as_criteria_input_field(col_subtype, col, current_query, filter_val)
+      size = 32
       unless filter_val.blank?
         current_value = filter_val
       else
@@ -73,13 +74,13 @@ module ActsAsCriteria
       input_name = :"query[#{col}][value][]"
       case col_subtype
         when :text, :num
-          then text_field_tag(input_name, current_value, :id => nil)
+          then text_field_tag(input_name, current_value, :id => nil, :size => size)
         when :period
           then 
             if self.respond_to? "calendar_date_select_tag"
-              calendar_date_select_tag(input_name, current_value, :id => nil)
+              calendar_date_select_tag(input_name, current_value, :id => nil, :size => size - 5)
             else
-              text_field_tag(input_name, current_value, :id => nil)
+              text_field_tag(input_name, current_value, :id => nil, :size => size)
             end
         when :bool
           then select_tag input_name, options_for_select([["False","0"], ["True","1"]], current_value)
