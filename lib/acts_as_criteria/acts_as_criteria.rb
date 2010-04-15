@@ -36,20 +36,35 @@ module ActsAsCriteria
   end
   
   def filter(terms, options)
-    terms[:connector] ||= "AND"    
     conds, assocs  = [], []
-    
     options[:columns].each do |col, opts|
       unless terms[col].blank?
-        assocs << col.to_s.split(".").first.to_sym if !column_names.include?(col.to_s.split(".").first) && !terms[col][:value].blank?
-        col_name = column_names.include?(col.to_s.split(".").first) ? "#{table_name}.#{col}" : col
-        conds << [ "#{col_name} #{get_pattern(col, terms[col])}" ] unless terms[col][:value].blank?
+        assocs << col.to_s.split(".").first.to_sym if col_needs_assoc(col, terms)
+        col_name = get_col_name(col)
+        unless terms[col][:value].blank?
+          if terms[col][:value].size > 1
+            ored_cond = []
+            terms[col][:value].each do |col_value|
+              ored_cond <<  [ "#{col_name} #{get_pattern(col, { "match" => terms[col][:match], "value" => col_value })}" ]
+            end
+            conds << merge_conditions(*ored_cond.join(" OR "))
+          else
+            conds << [ "#{col_name} #{get_pattern(col, terms[col])}" ]
+          end
+        end
       end
     end
     
-    conditions = merge_conditions(*conds.join(" #{terms[:connector]} "))
-    
+    conditions = merge_conditions(*conds.join(" AND "))
     { :conditions => conditions, :include => assocs }
+  end
+
+  def col_needs_assoc(col, terms)
+    !column_names.include?(col.to_s.split(".").first) && !terms[col][:value].blank?
+  end
+
+  def get_col_name(col)
+    column_names.include?(col.to_s.split(".").first) ? "#{table_name}.#{col}" : col
   end
 
   def col_subtype(col)
@@ -71,17 +86,23 @@ module ActsAsCriteria
   end
   
   def get_pattern(col, term) 
-    self.send(:"get_#{col_subtype(col).to_s}_pattern", term)   
+    # first term conversion and checks
+    match = term["match"]
+    value = term["value"].class == Array ? term["value"].first : term["value"]
+    
+    self.send(:"get_#{col_subtype(col).to_s}_pattern", { :match => match, :value => value })
   end
   
-  def get_text_pattern(term)
+  def get_text_pattern(term)    
     term[:match] ||= :contains
     like = connection.adapter_name == "PostgreSQL" ? "ILIKE" : "LIKE"
     
     case term[:match].to_sym
-      when :exact
+      when :is
         "= '#{term[:value]}'"
-      when :start
+      when :is_not
+        "!= '#{term[:value]}'"        
+      when :begin
         "#{like} '#{term[:value]}%'"
       when :contains
         "#{like} '%#{term[:value]}%'"

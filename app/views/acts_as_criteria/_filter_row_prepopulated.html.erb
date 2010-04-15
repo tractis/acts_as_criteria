@@ -5,6 +5,13 @@
   <%- end %>
 <%- end %>
 <%- filters.each_with_index do |filter, index| %>
-  <%- @filter = filter %>
-  <%= render :partial => "acts_as_criteria/filter_row" %>
+  <%- @filter = filter %>  
+  <%- if @current_query[filter[:col_name]][:value].size == 1 %>
+    <%= render :partial => "acts_as_criteria/filter_row" %>
+  <%- else %>
+  	<%- @current_query[filter[:col_name]][:value].each_with_index do |filter_val, pos|%>
+	  <%- pos == 0 ? ored = false : ored = true %>
+	  <%= render :partial => "acts_as_criteria/filter_row", :locals => { :ored => ored, :filter_val => filter_val } %>
+	<%- end %>
+  <%- end %>
 <%- end %>

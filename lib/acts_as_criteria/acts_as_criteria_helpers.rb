@@ -46,9 +46,9 @@ module ActsAsCriteria
       case col_subtype
         when :text then 
           if col_options[:source].blank?  
-            opts = [["contains","contains"], ["not contains", "not_contains"], ["start","start"], ["end","end"], ["exact","exact"]]
+            opts = [["contains","contains"], ["doesn't contains", "not_contains"], ["begins with","begin"], ["ends with","end"], ["is","is"], ["is not","is_not"]]
           else
-            opts = [["contains","contains"], ["not contains", "not_contains"]]
+            opts = [["contains","contains"], ["doesn't contains", "not_contains"]]
           end            
         when :num, :period then 
           if col_options[:source].blank?
@@ -64,30 +64,39 @@ module ActsAsCriteria
       select_tag :"query[#{col}][match]", options_for_select(opts, current_match)
     end
     
-    def acts_as_criteria_input_field(col_subtype, col, current_query)
-      current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value]
-      
+    def acts_as_criteria_input_field(col_subtype, col, current_query, filter_val)
+      unless filter_val.blank?
+        current_value = filter_val
+      else
+        current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value].first
+      end      
+      input_name = :"query[#{col}][value][]"
       case col_subtype
         when :text, :num
-          then text_field_tag(:"query[#{col}][value]", current_value, :id => nil)
+          then text_field_tag(input_name, current_value, :id => nil)
         when :period
           then 
             if self.respond_to? "calendar_date_select_tag"
-              calendar_date_select_tag(:"query[#{col}][value]", current_value, :id => nil)
+              calendar_date_select_tag(input_name, current_value, :id => nil)
             else
-              text_field_tag(:"query[#{col}][value]", current_value, :id => nil)
+              text_field_tag(input_name, current_value, :id => nil)
             end
         when :bool
-          then select_tag :"query[#{col}][value]", options_for_select([["False","0"], ["True","1"]], current_value)
+          then select_tag input_name, options_for_select([["False","0"], ["True","1"]], current_value)
         else
           raise "Column subtype not supported: #{col_subtype}"    
       end
     end
     
-    def acts_as_criteria_input_source(col_subtype, col, source, current_query)
-      current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value]
+    def acts_as_criteria_input_source(col_subtype, col, source, current_query, filter_val)
+      unless filter_val.blank?
+        current_value = filter_val
+      else
+        current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value].first
+      end       
+      
       options = source.call(options)
-      select_tag :"query[#{col}][value]", options_for_select(options, current_value.to_i)
+      select_tag :"query[#{col}][value][]", options_for_select(options, current_value.to_i)
     end
     
     def acts_as_criteria_set_visibility(type, current_query, options = nil)

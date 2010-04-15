@@ -5,7 +5,6 @@ module ActsAsCriteria
     # Only search If the model activates the acts_as_criteria plugin
     #----------------------------------------------------------------------------
     def search
-      #require 'ruby-debug';debugger
       model = controller_name.singularize.camelize.constantize
       named = model.criteria_options[:named].to_s ||= "search" if model.respond_to?(:criteria_options)
       
