@@ -35,8 +35,7 @@ module ActsAsCriteria
         # Mantain current_query state if option given 
         unless model.criteria_options[:mantain_current_query].blank?
           model.criteria_options[:mantain_current_query].call(params[:query], controller_name, session)
-        end
-        
+        end        
         
         respond_to do |format|
           format.html { render :action => :index }
@@ -54,16 +53,15 @@ module ActsAsCriteria
     def criteria
       model = controller_name.singularize.camelize.constantize
       columns = model.criteria_options[:filter][:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, "")
-      #model.criteria_options[:sel_text]
       locals = {}
-      # TODO: return invalid_action if not params[:id]
+
       case params[:id]
         when "activate_filters"
           action = "acts_as_criteria/activate_filter"
         when "activate_simple"
           action = "acts_as_criteria/activate_simple"
         when "new_filter_row"
-           unless params[:col_name].blank? 
+          unless params[:col_name].blank? 
               col_name = params[:col_name]
               @filter = { :col_name => col_name, :col_text => model.criteria_options[:filter][:columns][:"#{col_name}"][:text] || col_name,:col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
               action = "acts_as_criteria/new_filter_row"
@@ -83,12 +81,36 @@ module ActsAsCriteria
           unless model.criteria_options[:mantain_current_query].blank?
             model.criteria_options[:mantain_current_query].call(nil, controller_name, session)
           end          
-          action = "acts_as_criteria/clear_filter"    
+          action = "acts_as_criteria/clear_filters"
+        when "save_filters"
+          filter = Filter.new(:user_id => params[:user_id], :name => params[:filter_name], :criteria => criteria_hash_to_query_string, :asset => controller_name)
+          if filter.save
+            flash[:notice] = "Succefully saved filter"
+          else
+            flash[:error] = "Your filter can't be saved"
+          end
+          action = "acts_as_criteria/save_filters"
+        else
+          action = "acts_as_criteria/invalid_action"
       end
       
       respond_to do |format|
         format.js   { render :template => action, :locals => locals }
       end       
+    end
+
+    private
+    def criteria_hash_to_query_string      
+      filter = send("current_query")
+      query_var = []
+      filter.each do |col, info|
+        query_var << "query[#{col}][match]=#{info["match"]}"
+        info["value"].each do |val|
+          query_var << "query[#{col}][value][]=#{val}"
+        end
+      end
+
+      query_var.join("&")
     end
     
   end

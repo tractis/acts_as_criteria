@@ -7,7 +7,7 @@
 	</div>	
 	<br />
   	<div id="criteria_filter_actions">
-		Add filter <%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
+		Add Criteria <%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
 		<%= submit_tag options[:label] %>
 		
 		<%- unless options[:clear].blank? %>
