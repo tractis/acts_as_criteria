@@ -135,7 +135,7 @@ module ActsAsCriteria
     end
 
     def acts_as_criteria_select_user_filters(current_user, text = "select existing")
-      filters = Filter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
+      filters = UserFilter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
       options = filters.map{ |filter| [filter.name, filter.criteria] }.insert(0, text)
       select_tag "criteria_select_filter", options_for_select(options, 0), :onchange => "document.location = '#{send("search_#{controller_name}_path")}?' + this.value"
     end
@@ -145,7 +145,8 @@ module ActsAsCriteria
 
       form << form_remote_tag(:url => { :action => :criteria, :id => "save_filters" })
       form << hidden_field_tag("user_id", current_user)
-      form << text_field_tag("filter_name", nil, :size => 15)
+      form << "Name: #{text_field_tag("filter_name", nil, :size => 15)}"
+      form << "Description: #{text_field_tag("filter_description", nil, :size => 35)}"
       form << submit_tag("save")
 
       form.join("\n")

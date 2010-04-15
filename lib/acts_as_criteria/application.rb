@@ -83,7 +83,7 @@ module ActsAsCriteria
           end          
           action = "acts_as_criteria/clear_filters"
         when "save_filters"
-          filter = Filter.new(:user_id => params[:user_id], :name => params[:filter_name], :criteria => criteria_hash_to_query_string, :asset => controller_name)
+          filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
           if filter.save
             flash[:notice] = "Succefully saved filter"
           else
