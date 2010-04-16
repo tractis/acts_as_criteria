@@ -22,8 +22,8 @@ module ActsAsCriteria
         end
       else
         options[:action] ||= self.send("search_#{model.to_s.downcase.pluralize}_path")
-      end      
-      options[:label] ||= "Search"
+      end
+      options[:label] ||= acts_as_criteria_get_translation(model, "search")
       render :partial => "acts_as_criteria/simple", :locals => { :options => options, :multi => multi, :model => model }
     end
     
@@ -35,20 +35,48 @@ module ActsAsCriteria
       options[:class]  ||= :search
       options[:method] ||= :get
       options[:action] ||= self.send("search_#{model.to_s.downcase.pluralize}_path")
-      options[:label] ||= "Filter"
+      options[:label] ||= acts_as_criteria_get_translation(model, "filter")
       
-      render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => filters[:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, "") }      
+      render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => options_for_columns(filters) }
+    end
+
+    def options_for_columns(filters)      
+      filters[:columns].map { |col, val| [ acts_as_criteria_get_translation(acts_as_criteria_get_current_model, val[:text]||col), col ] }.insert(0, "")
     end
     
+    def acts_as_criteria_get_translation(model, text)
+      # Check for internalization support
+      if model.criteria_options[:i18n]
+        model.criteria_options[:i18n].call(text)
+      else
+        text
+      end
+    end
+
+    def acts_as_criteria_get_current_model
+      controller_name.singularize.camelize.constantize
+    end
+
+    def acts_as_criteria_input_label(col, col_options)
+      if col_options[:text]
+        acts_as_criteria_get_translation(acts_as_criteria_get_current_model, col_options[:text])
+      else
+        acts_as_criteria_get_translation(acts_as_criteria_get_current_model, col)
+      end
+    end
+
     def acts_as_criteria_input_operator(col_subtype, col, current_query, col_options)      
       current_match = (current_query.blank? || current_query[col].blank? || current_query[col][:match].blank?) ? "" : current_query[col][:match]
-      
+      model = acts_as_criteria_get_current_model
+
       case col_subtype
         when :text then 
           if col_options[:source].blank?  
-            opts = [["contains","contains"], ["doesn't contains", "not_contains"], ["begins with","begin"], ["ends with","end"], ["is","is"], ["is not","is_not"]]
+            opts = [[acts_as_criteria_get_translation(model,"contains"),"contains"], [acts_as_criteria_get_translation(model,"doesnt_contains"), "not_contains"],
+                    [acts_as_criteria_get_translation(model,"begins_with"),"begin"], [acts_as_criteria_get_translation(model,"ends_with"),"end"],
+                    [acts_as_criteria_get_translation(model,"is"),"is"], [acts_as_criteria_get_translation(model,"is_not"),"is_not"]]
           else
-            opts = [["contains","contains"], ["doesn't contains", "not_contains"]]
+            opts = [[acts_as_criteria_get_translation(model,"contains"),"contains"], [acts_as_criteria_get_translation(model,"doesnt_contains"), "not_contains"]]
           end            
         when :num, :period then 
           if col_options[:source].blank?
@@ -123,20 +151,20 @@ module ActsAsCriteria
     
     def acts_as_criteria_get_action_link(action, type)
       if type[:text]
-        link = type[:text]
+        link_name = acts_as_criteria_get_translation(acts_as_criteria_get_current_model, type[:text])
       else
-        link = image_tag(type[:image])
+        link_name = image_tag(type[:image])
       end
-      link_to_remote link, :url => { :action => :criteria, :id => action }
+      link_to_remote link_name, :url => { :action => :criteria, :id => action }
     end
     
     def acts_as_criteria_is_filter_active(current_query)
       current_query.instance_of?(HashWithIndifferentAccess)
     end
 
-    def acts_as_criteria_select_user_filters(current_user, text = "select existing")
+    def acts_as_criteria_select_user_filters(current_user, text = "select_existing")
       filters = UserFilter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
-      options = filters.map{ |filter| [filter.name, filter.criteria] }.insert(0, text)
+      options = filters.map{ |filter| [filter.name, filter.criteria] }.insert(0, acts_as_criteria_get_translation(acts_as_criteria_get_current_model, text))
       select_tag "criteria_select_filter", options_for_select(options, 0), :onchange => "document.location = '#{send("search_#{controller_name}_path")}?' + this.value"
     end
 
@@ -145,9 +173,9 @@ module ActsAsCriteria
 
       form << form_remote_tag(:url => { :action => :criteria, :id => "save_filters" })
       form << hidden_field_tag("user_id", current_user)
-      form << "Name: #{text_field_tag("filter_name", nil, :size => 15)}"
-      form << "Description: #{text_field_tag("filter_description", nil, :size => 35)}"
-      form << submit_tag("save")
+      form << "#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "name")}: #{text_field_tag("filter_name", nil, :size => 15)}"
+      form << "#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "description")}: #{text_field_tag("filter_description", nil, :size => 35)}"
+      form << submit_tag("#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "save")}")
 
       form.join("\n")
     end

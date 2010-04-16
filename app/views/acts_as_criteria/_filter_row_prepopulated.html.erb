@@ -4,14 +4,15 @@
     <%- filters << { :col_name => col, :col_text => model.criteria_options[:filter][:columns][:"#{col}"][:text] || col,:col_subtype => model.col_subtype(col), :col_options => model.criteria_options[:filter][:columns][:"#{col}"] } %>	
   <%- end %>
 <%- end %>
-<%- filters.each_with_index do |filter, index| %>
-  <%- @filter = filter %>  
+<%- filters.each do |filter| %>
+  <%- @filter = filter %>
   <%- if @current_query[filter[:col_name]][:value].size == 1 %>
     <%= render :partial => "acts_as_criteria/filter_row" %>
   <%- else %>
   	<%- @current_query[filter[:col_name]][:value].each_with_index do |filter_val, pos|%>
-	  <%- pos == 0 ? ored = false : ored = true %>
-	  <%= render :partial => "acts_as_criteria/filter_row", :locals => { :ored => ored, :filter_val => filter_val } %>
+          <%- pos == 0 ? ored = false : ored = true %>
+          <%- @current_query[filter[:col_name]][:value].size == pos + 1 ? close_col_section = true : close_col_section = false %>
+	  <%= render :partial => "acts_as_criteria/filter_row", :locals => { :ored => ored, :filter_val => filter_val, :close_col_section => close_col_section } %>
 	<%- end %>
   <%- end %>
 <%- end %>

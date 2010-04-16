@@ -52,7 +52,6 @@ module ActsAsCriteria
     #----------------------------------------------------------------------------    
     def criteria
       model = controller_name.singularize.camelize.constantize
-      columns = model.criteria_options[:filter][:columns].map { |col, val| [ val[:text]||col, col ] }.insert(0, "")
       locals = {}
 
       case params[:id]
@@ -61,7 +60,7 @@ module ActsAsCriteria
         when "activate_simple"
           action = "acts_as_criteria/activate_simple"
         when "new_filter_row"
-          unless params[:col_name].blank? 
+          unless params[:col_name].blank?
               col_name = params[:col_name]
               @filter = { :col_name => col_name, :col_text => model.criteria_options[:filter][:columns][:"#{col_name}"][:text] || col_name,:col_subtype => model.col_subtype(col_name), :col_options => model.criteria_options[:filter][:columns][:"#{col_name}"] }
               action = "acts_as_criteria/new_filter_row"
@@ -76,7 +75,6 @@ module ActsAsCriteria
             action = "acts_as_criteria/invalid_action"
           end
         when "clear_filters"
-          locals = { :columns => columns }
           instance_variable_set("@current_query", nil)
           unless model.criteria_options[:mantain_current_query].blank?
             model.criteria_options[:mantain_current_query].call(nil, controller_name, session)
@@ -85,9 +83,9 @@ module ActsAsCriteria
         when "save_filters"
           filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
           if filter.save
-            flash[:notice] = "Succefully saved filter"
+            flash[:notice] = "succefully_saved_filter"
           else
-            flash[:error] = "Your filter can't be saved"
+            flash[:error] = "failed_save_filter"
           end
           action = "acts_as_criteria/save_filters"
         else

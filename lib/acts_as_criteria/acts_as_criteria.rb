@@ -39,7 +39,7 @@ module ActsAsCriteria
     conds, assocs  = [], []
     options[:columns].each do |col, opts|
       unless terms[col].blank?
-        assocs << col.to_s.split(".").first.to_sym if col_needs_assoc(col, terms)
+        assocs << get_col_assoc(col, opts) if col_needs_assoc(col, terms)
         col_name = get_col_name(col)
         unless terms[col][:value].blank?
           if terms[col][:value].size > 1
@@ -57,6 +57,10 @@ module ActsAsCriteria
     
     conditions = merge_conditions(*conds.join(" AND "))
     { :conditions => conditions, :include => assocs }
+  end
+
+  def get_col_assoc(col, opts)
+    opts[:relation_name] || col.to_s.split(".").first.to_sym
   end
 
   def col_needs_assoc(col, terms)

@@ -1,38 +1,40 @@
 <%- ored ||= false %>
+<%- close_col_section = true if close_col_section == nil %>
 <%- filter_val ||= nil %>
 
 <%- unless ored %>
   <div id="filter_<%= @filter[:col_name] %>">
 <%- end %>  	
 	<div style = "width: 80px; text-align: right; float: left; line-height:1.6em; display: table-cell; ">
-	  <%- unless ored %>	
-		<%= @filter[:col_text] %>
+	  <%- unless ored %>
+            <%= acts_as_criteria_input_label(@filter[:col_name], @filter[:col_options]) %>
 	  <%- else %>
 	    &nbsp;
 	  <%- end %>		
 	</div>
 	<div style = "width: 123px; text-align: right; float: left; line-height:1.6em; display : table-cell;">
 	  <%- unless ored %>	
-		<%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name], @current_query, @filter[:col_options]) %>
+            <%= acts_as_criteria_input_operator(@filter[:col_subtype], @filter[:col_name], @current_query, @filter[:col_options]) %>
 	  <%- else %>
 	    or
 	  <%- end %>		
 	</div>
 	<div style = "width: 266px; float: left; display : table-cell;">
-		<%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
-		  <%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name], @current_query, filter_val) %>
-		<%- else %>
-		  <%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source], @current_query, filter_val) %>
-		<%- end %>
+          <%- if @filter[:col_options] && @filter[:col_options][:source].blank? %>
+            <%= acts_as_criteria_input_field(@filter[:col_subtype], @filter[:col_name], @current_query, filter_val) %>
+          <%- else %>
+            <%= acts_as_criteria_input_source(@filter[:col_subtype], @filter[:col_name], @filter[:col_options][:source], @current_query, filter_val) %>
+          <%- end %>
 	</div>
 	<div style = "width: 10px; float: left; display : table-cell;">
 	  <%- unless ored %>
-		<%= button_to_remote("-", {:url => { :action => :criteria, :id => "destroy_filter_row", :col_name => "filter_#{@filter[:col_name]}" }}) %>
+            <%= button_to_remote("-", {:url => { :action => :criteria, :id => "destroy_filter_row", :col_name => "filter_#{@filter[:col_name]}" }}) %>
 	  <%- else %>
 	    &nbsp;
 	  <%- end %>
 	</div>
 	<div style = "clear: both;"></div>
-<%- unless ored %>
+
+<%- if close_col_section == true %>
   </div>
 <%- end %>

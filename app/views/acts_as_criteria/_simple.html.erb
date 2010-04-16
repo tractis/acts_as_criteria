@@ -1,17 +1,17 @@
 <%- current_query = @current_query.instance_of?(String) ? @current_query : ""  %>
 <div id="criteria_simple" class="<%= options[:class] %>">  
   <% form_tag multi == true ? options[:actions][0].last : options[:action], :method => options[:method], :class => options[:class] do -%>
-	<%= text_field_tag("query", current_query, :size => options[:size] || 25, :disabled => acts_as_criteria_set_visibility(:simple, @current_query)) %>
-	<%- if multi == true %>	
-	  <%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
-	<%- end %>
-	<%- unless options[:advanced].blank? %>
-	  <%= acts_as_criteria_get_action_link("filter", options[:advanced])  %>  
-	<%- end %>
-	<%- if options[:live].blank? %>
-		<%= submit_tag options[:label] %>
-	<%- else %>
-		<%= observe_field("query", :frequency => options[:live][:frequency], :function => options[:live][:trigger]) %>
-	<%- end %>
+    <%= text_field_tag("query", current_query, :size => options[:size] || 25, :disabled => acts_as_criteria_set_visibility(:simple, @current_query)) %>
+    <%- if multi == true %>
+      <%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
+    <%- end %>
+    <%- unless options[:advanced].blank? %>
+      <%= acts_as_criteria_get_action_link("filter", options[:advanced])  %>
+    <%- end %>
+    <%- if options[:live].blank? %>
+      <%= submit_tag options[:label] %>
+    <%- else %>
+      <%= observe_field("query", :frequency => options[:live][:frequency], :function => options[:live][:trigger]) %>
+    <%- end %>
   <% end -%>
 </div>
