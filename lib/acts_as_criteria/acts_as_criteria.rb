@@ -28,10 +28,13 @@ module ActsAsCriteria
     class_inheritable_accessor  :criteria_options
     write_inheritable_attribute :criteria_options, options
     
-    named_scope options[:named], lambda { |terms|            
-      terms = simple_options[:escape].call(terms) if simple_options[:escape]      
-      return simple(terms, simple_options[:columns], simple_options[:match]) if terms.instance_of? String
-      filter(terms, filter_options)
+    named_scope options[:named], lambda { |terms|
+      if terms.instance_of? String
+        terms = simple_options[:escape].call(terms) if simple_options[:escape]
+        simple(terms, simple_options[:columns], simple_options[:match]) if terms.instance_of? String
+      else
+        filter(terms, filter_options)
+      end
     }
   end
   
@@ -45,11 +48,11 @@ module ActsAsCriteria
           if terms[col][:value].size > 1
             ored_cond = []
             terms[col][:value].each do |col_value|
-              ored_cond <<  [ "#{col_name} #{get_pattern(col, { "match" => terms[col][:match], "value" => col_value })}" ]
+              ored_cond <<  [ "#{col_name} #{get_pattern(col, { "match" => terms[col][:match], "value" => col_value })}" ] if check_data(col, col_value)
             end
             conds << merge_conditions(*ored_cond.join(" OR "))
           else
-            conds << [ "#{col_name} #{get_pattern(col, terms[col])}" ]
+            conds << [ "#{col_name} #{get_pattern(col, terms[col])}" ] if check_data(col, terms[col][:value].first)
           end
         end
       end
@@ -57,6 +60,23 @@ module ActsAsCriteria
     
     conditions = merge_conditions(*conds.join(" AND "))    
     { :conditions => conditions, :include => assocs }
+  end
+
+  def check_data(col, value)
+    case col_subtype(col)
+      when :text
+        true
+      when :num
+        is_numeric?(value)
+      when :period
+        Date.parse(value) rescue false
+      when :bool
+        is_numeric?(value)
+    end
+  end
+
+  def is_numeric?(term)
+    true if Float(term) rescue false
   end
 
   def get_col_assoc(col, opts)
