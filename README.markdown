@@ -107,6 +107,7 @@ environment.rb
 For plugin developers
 ============
 You can extend the filters on your own plugin:
+
  * Put a file in vendor/plugins/my_plugin/config/criteria_filter.rb
  * Define a method get_"PLUGIN_NAME"_criteria_filters
  * Return an array of hashes with the model to apply the filter and the options
