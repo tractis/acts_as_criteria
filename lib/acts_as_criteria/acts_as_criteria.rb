@@ -55,7 +55,7 @@ module ActsAsCriteria
       end
     end
     
-    conditions = merge_conditions(*conds.join(" AND "))
+    conditions = merge_conditions(*conds.join(" AND "))    
     { :conditions => conditions, :include => assocs }
   end
 
@@ -173,16 +173,16 @@ module ActsAsCriteria
       pattern = get_like(match, term)
       merge_conditions acc, [columns.collect { |column| "#{table_name}.#{column} #{like} :pattern" }.join(' OR '), { :pattern => pattern }]
     end
-    
+
     { :conditions => conditions }    
   end
   
   def get_like(match, term)
     match ||= :contains
     case(match)
-    when :exact
+    when :is
       term
-    when :start
+    when :begin
       term + '%'
     when :contains
       '%' + term + '%'
