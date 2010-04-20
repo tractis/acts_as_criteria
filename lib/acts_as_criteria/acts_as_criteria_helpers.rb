@@ -123,9 +123,10 @@ module ActsAsCriteria
       else
         current_value = (current_query.blank? || current_query[col].blank? || current_query[col][:value].blank?) ? "" : current_query[col][:value].first
       end       
-      
+      current_value = current_value.to_i if Float(current_value) rescue false
+
       options = source.call(options)
-      select_tag :"query[#{col}][value][]", options_for_select(options, current_value.to_i)
+      select_tag :"query[#{col}][value][]", options_for_select(options, current_value)
     end
     
     def acts_as_criteria_set_visibility(type, current_query, options = nil)
