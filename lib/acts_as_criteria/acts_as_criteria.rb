@@ -48,11 +48,12 @@ module ActsAsCriteria
           if terms[col][:value].size > 1
             ored_cond = []
             terms[col][:value].each do |col_value|
-              ored_cond <<  [ "#{col_name} #{get_pattern(col, { "match" => terms[col][:match], "value" => col_value })}" ] if check_data(col, col_value)
+              ored_term = { "match" => terms[col][:match], "value" => col_value }
+              ored_cond <<  get_condition(col_name, col, ored_term, opts) if check_data(col, col_value)
             end
             conds << merge_conditions(*ored_cond.join(" OR "))
           else
-            conds << [ "#{col_name} #{get_pattern(col, terms[col])}" ] if check_data(col, terms[col][:value].first)
+            conds << get_condition(col_name, col, terms[col], opts) if check_data(col, terms[col][:value].first)
           end
         end
       end
@@ -60,6 +61,14 @@ module ActsAsCriteria
     
     conditions = merge_conditions(*conds.join(" AND "))    
     { :conditions => conditions, :include => assocs }
+  end
+
+  def get_condition(col_name, col, term, opts)
+    if opts[:condition]
+      opts[:condition].call(term["value"], self)
+    else
+      [ "#{col_name} #{get_pattern(col, term)}" ]
+    end
   end
 
   def check_data(col, value)

@@ -70,6 +70,7 @@ Starting from that point a set of options can be specified in the model definiti
  * Custom restriction to search results
  * Translations
  * Custom method to mantain the filters state in session
+ * Custom conditions
 ...
 
 Complete example explained
@@ -113,5 +114,5 @@ You can extend the filters on your own plugin:
 Example, adds a filter by category to the Account model
 
     def get_my_plugin_criteria_filters
-        [{ :model => Account, :filters => { :"cats.id" => { :text => "Categoria", :source => lambda { |options| Cat.all.map { |cat| [cat.long_name, cat.id] } } } } } ]
+        [{ :model => Account, :filters => { :"cats.id" => { :text => "Categoria", :condition => lambda { |value, model| "(cats.id = #{value} or cats.parent_id = #{value}) and cat_type = '#{model.to_s}'" }, :source => lambda { |options| Cat.all.map { |cat| [cat.long_name, cat.id] } } } } } ]
     end
