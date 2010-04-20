@@ -8,21 +8,18 @@ Simple search introduction
 
 Simple search is based on simple_column_search plugin, extended to provide multi-model search, here the most simple example, put it in your model:
 
-`
-class Account < ActiveRecord::Base
-    acts_as_criteria :simple => { :columns => [:name, :description] }
-end
-`
+    class Account < ActiveRecord::Base
+        acts_as_criteria :simple => { :columns => [:name, :description] }
+    end
 
-This will create a search method on Account, you can use Account.search("Bank Spain") and will generate a query that looks like
-`
-((accounts.name LIKE '%Bank%' OR accounts.description LIKE '%Bank%')) AND (accounts.name LIKE '%Spain%' OR accounts.description LIKE '%Spain%')"
-`
+This will create a search method on Account, you can use Account.search("Bank Spain") and will generate a query that looks like:
+
+    ((accounts.name LIKE '%Bank%' OR accounts.description LIKE '%Bank%')) AND (accounts.name LIKE '%Spain%' OR accounts.description LIKE '%Spain%')"
 
 In your view, you can use the helper for simple search as following:
-`
-<%= acts_as_criteria_form :simple, Account %>
-`
+
+    <%= acts_as_criteria_form :simple, Account %>
+
 This will create the search form and a search method in the accounts_controller will handle the calls to the model for you.
 
 Starting from that point a set of options can be specified in the model definition and the helper to help integrate smooth on your app, assuming some rules.
@@ -40,16 +37,13 @@ Filters introduction
 ============
 This will add advancend filter system to your app, here the most simple example, put it in your model:
 
-`
-class Account < ActiveRecord::Base
-    acts_as_criteria :filter => { :columns => { :name => {}, :description => {}, :updated_at } }
-end
-`
+    class Account < ActiveRecord::Base
+        acts_as_criteria :filter => { :columns => { :name => {}, :description => {}, :updated_at } }
+    end
 
 In your view, you can use the helper for the dynamic filters as following:
-`
-<%= acts_as_criteria_form :filter, Account %>
-`
+
+    <%= acts_as_criteria_form :filter, Account %>
 
 This will create a dynamic form that will let add/delete filter with the columns specified with the operators that depends on the column type (auto-detected)
 
@@ -80,8 +74,7 @@ Starting from that point a set of options can be specified in the model definiti
 
 Complete example explained
 ============
-`
-  acts_as_criteria :i18n                   => lambda { |text| I18n.t(text) },
+    acts_as_criteria :i18n                   => lambda { |text| I18n.t(text) },
                    :mantain_current_query  => lambda { |query, controller_name, session| session["#{controller_name}_current_query".to_sym] = query },
                    :restrict => { :method  => "my", :options => lambda { |current_user| { :user => current_user} } },
                    :paginate => { :method  => "paginate", :options => lambda { |current_user| { :page => 1, :per_page => current_user.pref[:accounts_per_page]} } },
@@ -93,7 +86,6 @@ Complete example explained
                                                 :updated_at => {},
                                                 :"addresses.country" => { :text => "country", :relation_name => :billing_address, :source => lambda { |options| Country.all } }
                                               } }
-`
 
 Saved searches
 ============
@@ -101,17 +93,15 @@ This plugin enables your users to save the advanced filters for later use.
 
 Installation
 ============
-`
-script/plugin install git://github.com/tractis/acts_as_criteria.git
-rake db:migrate:plugin NAME=acts_as_criteria
-restart your webserver
-`
+    script/plugin install git://github.com/tractis/acts_as_criteria.git
+    rake db:migrate:plugin NAME=acts_as_criteria
+    restart your webserver
 
 Configuration
 ============
 environment.rb
 
-config.plugins = [ :acts_as_criteria, :all ]
+    config.plugins = [ :acts_as_criteria, :all ]
 
 For plugin developers
 ============
@@ -122,8 +112,6 @@ You can extend the filters on your own plugin:
 
 Example, adds a filter by category to the Account model
 
-`
-def get_my_plugin_criteria_filters
-  [{ :model => Account, :filters => { :"cats.id" => { :text => "Categoria", :source => lambda { |options| Cat.all.map { |cat| [cat.long_name, cat.id] } } } } } ]
-end
-`
+    def get_my_plugin_criteria_filters
+        [{ :model => Account, :filters => { :"cats.id" => { :text => "Categoria", :source => lambda { |options| Cat.all.map { |cat| [cat.long_name, cat.id] } } } } } ]
+    end
