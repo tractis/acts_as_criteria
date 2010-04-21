@@ -83,9 +83,11 @@ module ActsAsCriteria
         when "save_filters"
           filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
           if filter.save
-            flash[:notice] = "succefully_saved_filter"
+            message = model.criteria_options[:i18n] ? model.criteria_options[:i18n].call("succefully_saved_filter") : "Succefully saved filter"
+            flash[:notice] = message
           else
-            flash[:error] = "failed_save_filter"
+            message = model.criteria_options[:i18n] ? model.criteria_options[:i18n].call("failed_save_filter") : "The filter can't be saved"
+            flash[:error] = message
           end
           action = "acts_as_criteria/save_filters"
         else
