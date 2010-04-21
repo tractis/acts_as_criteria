@@ -59,7 +59,7 @@ module ActsAsCriteria
       end
     end
     
-    conditions = merge_conditions(*conds.join(" AND "))    
+    conditions = merge_conditions(*conds.join(" AND "))
     { :conditions => conditions, :include => assocs }
   end
 
@@ -67,8 +67,17 @@ module ActsAsCriteria
     if opts[:condition]
       opts[:condition].call(term["value"], self)
     else
-      [ "#{col_name} #{get_pattern(col, term)}" ]
+      [ "#{get_colname(col, col_name)} #{get_pattern(col, term)}" ]
     end
+  end
+
+  def get_colname(col, col_name)
+    unless col_subtype(col) == :period
+      col_name
+    else
+      "DATE(#{col_name})"
+    end
+    
   end
 
   def check_data(col, value)
@@ -109,7 +118,7 @@ module ActsAsCriteria
         then :text
       when :integer, :float, :decimal
         then :num
-      when :datetime, :timestamp, :time, :date
+      when :datetime, :date
         then :period
       when :boolean
         then :bool
@@ -171,20 +180,21 @@ module ActsAsCriteria
   
   def get_period_pattern(term)
     term[:match] ||= :eq
-    
+    value = Time.parse(term[:value]).strftime("%Y-%m-%d")
+
     case term[:match].to_sym
       when :eq
-        "= '#{term[:value]}'"
+        "= '#{value}'"
       when :ne
-        "<> '#{term[:value]}'"
+        "<> '#{value}'"
       when :gt
-        "> '#{term[:value]}'"
+        "> '#{value}'"
       when :ge
-        ">= '#{term[:value]}'"
+        ">= '#{value}'"
       when :lt
-        "< '#{term[:value]}'"
+        "< '#{value}'"
       when :le
-        "<= '#{term[:value]}'"
+        "<= '#{value}'"
       else
         raise "Unexpected match type: #{term[:match]}"        
     end    
