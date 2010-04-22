@@ -129,7 +129,7 @@ module ActsAsCriteria
       select_tag :"query[#{col}][value][]", options_for_select(options, current_value)
     end
     
-    def acts_as_criteria_set_visibility(type, current_query, options = nil)
+    def acts_as_criteria_set_visibility(type, current_query, options = {})
       case type
         when :simple then
           # Disabling the simple search input if query active and is not a string (is a filter)

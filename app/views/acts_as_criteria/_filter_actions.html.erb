@@ -1,0 +1,12 @@
+<%- options ||= {} %>
+<div id="criteria_filter_actions" <%= acts_as_criteria_set_visibility(:filter, @current_query) %>>
+  <%= button_to_function options[:label] || "Filter", "document.acts_as_criteria_filter_form.submit()" %>
+
+  <%- unless options[:clear].blank? %>
+    <%= acts_as_criteria_get_action_link("clear_filters", options[:clear]) %>
+  <%- end %>
+
+  <%- unless options[:simple].blank? %>
+    <%= acts_as_criteria_get_action_link("activate_simple", options[:simple]) %>
+  <%- end %>
+</div>

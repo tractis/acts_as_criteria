@@ -1,1 +1,11 @@
 page.show "criteria_filter"
+
+# Hide filter_active div if exists
+page << "if($('filter_active') != undefined){"
+page.show "filter_active"
+page << '}'
+
+# Hide filter_inactive div if exists
+page << "if($('filter_inactive') != undefined){"
+page.hide "filter_inactive"
+page << '}'
