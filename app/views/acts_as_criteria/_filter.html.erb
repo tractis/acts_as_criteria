@@ -1,29 +1,29 @@
 <div id="criteria_filter" <%= acts_as_criteria_set_visibility(:filter, @current_query, options) %>>
-  <% form_tag options[:action], :method => options[:method], :name => "acts_as_criteria_filter_form", :class => options[:class] do -%>
-  	<div id="criteria_filter_items" style = "display: table; width: 480px;">
-          <%- if acts_as_criteria_is_filter_active(@current_query) %>
-            <%= render :partial => "acts_as_criteria/filter_row_prepopulated", :locals => { :model => model } %>
-          <%- end %>
-	</div>	
-	<br />
-  	<div id="criteria_filter_items_actions">
-          <%= acts_as_criteria_get_translation(model, "add_criteria") %>
-          <%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
+  <% form_tag options[:action], :method => options[:method], :name => "acts_as_criteria_filter_form", :class => options[:class] do %>
+    <div id="criteria_filter_items" style = "display: table; width: 480px;">
+      <% if acts_as_criteria_is_filter_active(@current_query) %>
+        <%= render :partial => "acts_as_criteria/filter_row_prepopulated", :locals => { :model => model } %>
+      <% end %>
+    </div>
+    <br />
+    <div id="criteria_filter_items_actions">
+      <%= acts_as_criteria_get_translation(model, "add_criteria") %>
+      <%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
 
-          <%- if options[:no_actions].blank? %>
-            <div id="criteria_filter_actions">
-              <%= submit_tag options[:label] %>
+      <% if options[:no_actions].blank? %>
+        <div id="criteria_filter_actions">
+          <%= submit_tag options[:label] %>
 
-              <%- unless options[:clear].blank? %>
-                <%= acts_as_criteria_get_action_link("clear_filters", options[:clear]) %>
-              <%- end %>
+          <% unless options[:clear].blank? %>
+            <%= acts_as_criteria_get_action_link("clear_filters", options[:clear]) %>
+          <% end %>
 
-              <%- unless options[:simple].blank? %>
-                <%= acts_as_criteria_get_action_link("activate_simple", options[:simple]) %>
-              <%- end %>
-            </div>
-          <%- end %>
-	</div>
-	<br />
-  <% end -%>
+          <% unless options[:simple].blank? %>
+            <%= acts_as_criteria_get_action_link("activate_simple", options[:simple]) %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <br />
+  <% end %>
 </div>

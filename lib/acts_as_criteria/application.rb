@@ -81,7 +81,13 @@ module ActsAsCriteria
           end          
           action = "acts_as_criteria/clear_filters"
         when "save_filters"
-          filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
+          if params[:criteria_select_filter].blank?
+            filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
+          else
+            filter = UserFilter.find(:first, :conditions => { :user_id => @current_user.id, :id => params[:criteria_select_filter] })
+            filter.criteria = criteria_hash_to_query_string
+          end
+          
           if filter.save
             message = model.criteria_options[:i18n] ? model.criteria_options[:i18n].call("msg_successful_saved_filter") : "Succefully saved filter"
             flash[:notice] = message
