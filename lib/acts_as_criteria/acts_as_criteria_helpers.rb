@@ -133,7 +133,7 @@ module ActsAsCriteria
       case type
         when :simple then
           # Disabling the simple search input if query active and is not a string (is a filter)
-          if current_query.instance_of?(String)
+          if current_query.blank? || current_query.instance_of?(String)
             return false
           else
             return true
