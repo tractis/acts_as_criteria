@@ -73,6 +73,10 @@ Starting from that point a set of options can be specified in the model definiti
  * Custom conditions
 ...
 
+View Helper options:
+
+ * js_framework : Defaults to prototype, but you can pass this options with "jquery" instead
+
 Complete example explained
 ============
     acts_as_criteria :i18n                   => lambda { |text| I18n.t(text) },

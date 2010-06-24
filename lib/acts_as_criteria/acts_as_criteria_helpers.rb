@@ -132,7 +132,7 @@ module ActsAsCriteria
     def acts_as_criteria_set_visibility(type, current_query, options = {})
       case type
         when :simple then
-          # Disabling the simple search input if query active and is not a string (is a filter)
+          # Enabling the simple search input if query not active or is string
           if current_query.blank? || current_query.instance_of?(String)
             return false
           else

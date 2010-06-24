@@ -1,7 +1,15 @@
+page << "if(typeof jQuery == 'undefined'){"
 page << "if($('filter_#{@filter[:col_name]}') != undefined){"
 page.insert_html :bottom, "filter_#{@filter[:col_name]}", :partial => "acts_as_criteria/filter_row", :locals => { :ored => true }
 page << '}else{'
 page.insert_html :bottom, 'criteria_filter_items', :partial => "acts_as_criteria/filter_row"
+page << '}'
+page << '}else{'
+page << "if($('#filter_#{@filter[:col_name]}').length != 0){"
+page.insert_html :bottom, "filter_#{@filter[:col_name]}", :partial => "acts_as_criteria/filter_row", :locals => { :ored => true }
+page << '}else{'
+page.insert_html :bottom, 'criteria_filter_items', :partial => "acts_as_criteria/filter_row"
+page << '}'
 page << '}'
 
 page["criteria_new_filter"].value = ""

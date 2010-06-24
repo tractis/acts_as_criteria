@@ -8,7 +8,11 @@
     <br />
     <div id="criteria_filter_items_actions">
       <%= acts_as_criteria_get_translation(model, "add_criteria") %>
-      <%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
+      <% if options[:js_framework].blank? || options[:js_framework] == "prototype" %>
+	<%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('criteria_new_filter').value")} %>
+      <% elsif options[:js_framework] == "jquery" %>
+	<%= select_tag "criteria_new_filter", options_for_select(columns), {:onchange => remote_function(:url => { :action => :criteria, :id => "new_filter_row" }, :with => "'col_name=' + $('#criteria_new_filter').val()")} %>
+      <% end %>
 
       <% if options[:no_actions].blank? %>
         <div id="criteria_filter_actions">

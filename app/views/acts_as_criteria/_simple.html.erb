@@ -6,7 +6,7 @@
       <%= select_tag nil, options_for_select(options[:actions]), :onchange => 'if (this.value) { this.form.action = this.value; }' %>
     <%- end %>
     <%- unless options[:advanced].blank? %>
-      <%= acts_as_criteria_get_action_link("filter", options[:advanced])  %>
+      <%= acts_as_criteria_get_action_link("activate_filters", options[:advanced])  %>
     <%- end %>
     <%- if options[:live].blank? %>
       <%= submit_tag options[:label] %>
