@@ -53,7 +53,8 @@ module ActsAsCriteria
             end
             conds << merge_conditions(*ored_cond.join(" OR "))
           else
-            conds << get_condition(col_name, col, terms[col], opts) if check_data(col, terms[col][:value].first)
+            validate = opts[:validate].nil? ? true : opts[:validate]
+            conds << get_condition(col_name, col, terms[col], opts) if check_data(col, terms[col][:value].first, validate)
           end
         end
       end
@@ -80,7 +81,9 @@ module ActsAsCriteria
     
   end
 
-  def check_data(col, value)
+  def check_data(col, value, validate)
+    return true if validate == false
+    
     case col_subtype(col)
       when :text
         true
