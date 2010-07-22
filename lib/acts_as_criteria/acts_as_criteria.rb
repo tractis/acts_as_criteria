@@ -42,7 +42,7 @@ module ActsAsCriteria
     conds, assocs  = [], []
     options[:columns].each do |col, opts|
       unless terms[col].blank?
-        assocs << get_col_assoc(col, opts) if col_needs_assoc(col, terms)
+        assocs << get_col_assoc(col, opts) if !opts[:no_assoc] == true && col_needs_assoc(col, terms)
         col_name = get_col_name(col)
         unless terms[col][:value].blank?
           if terms[col][:value].size > 1
