@@ -36,11 +36,10 @@ module ActsAsCriteria
       options[:method] ||= :get
       options[:action] ||= self.send("search_#{model.to_s.downcase.pluralize}_path")
       options[:label] ||= acts_as_criteria_get_translation(model, "filter")
-      
       render :partial => "acts_as_criteria/filter", :locals => { :options => options, :model => model, :columns => options_for_columns(filters) }
     end
 
-    def options_for_columns(filters)      
+    def options_for_columns(filters)
       filters[:columns].map { |col, val| [ acts_as_criteria_get_translation(acts_as_criteria_get_current_model, val[:text]||col), col ] }.sort.insert(0, "")
     end
     
@@ -163,17 +162,19 @@ module ActsAsCriteria
       current_query.instance_of?(HashWithIndifferentAccess)
     end
 
-    def acts_as_criteria_select_user_filters(current_user, text = "select_existing", autosubmit = true)
-      filters = UserFilter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
-      options = filters.map{ |filter| [filter.name, filter.criteria] }.insert(0, acts_as_criteria_get_translation(acts_as_criteria_get_current_model, text))
+    def acts_as_criteria_select_user_filters(current_user, model, text = "select_existing", autosubmit = true, id_to_criteria = true)
+      if model.criteria_options[:restrict].blank?
+        filters = UserFilter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
+      else
+        restrict = model.criteria_options[:restrict]
+        filters = UserFilter.send(:"#{restrict[:method]}", User.find(current_user)).find(:all, :conditions => { :asset => controller_name })
+      end
+      options = filters.map{ |filter| [filter.name, id_to_criteria.blank? ? filter.id : filter.criteria] }.insert(0, acts_as_criteria_get_translation(acts_as_criteria_get_current_model, text))
       onchange = autosubmit == true ? "document.location = '#{send("search_#{controller_name}_path")}?' + this.value" : ""
       select_tag "criteria_select_filter", options_for_select(options, 0), :onchange => onchange
     end
 
-    def acts_as_criteria_save_user_filter_form(current_user)
-      filters = UserFilter.find(:all, :conditions => { :user_id => current_user, :asset => controller_name })
-      options = filters.map{ |filter| [filter.name, filter.id] }.insert(0, [acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "select_one"), ""])
-
+    def acts_as_criteria_save_user_filter_form(current_user, model)
       form = []
 
       form << "<br />"
@@ -184,7 +185,7 @@ module ActsAsCriteria
       form << "#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "description")}: #{text_field_tag("filter_description", nil, :size => 35, :id => "acts_as_criteria_filter_description")}"
       form << "<br />"
       form << "<strong>#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "or_ovewrite_existing")}</strong>"
-      form << select_tag("criteria_select_filter", options_for_select(options, 0))
+      form << acts_as_criteria_select_user_filters(current_user, model, "select_one", false, false)
       form << "<br /><br />"
       form << submit_tag("#{acts_as_criteria_get_translation(acts_as_criteria_get_current_model, "save")}")
 

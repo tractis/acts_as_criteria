@@ -82,9 +82,14 @@ module ActsAsCriteria
           action = "acts_as_criteria/clear_filters"
         when "save_filters"
           if params[:criteria_select_filter].blank?
-            filter = UserFilter.new(:user_id => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
+            filter = UserFilter.new(:user_id => params[:user_id], :assigned_to => params[:user_id], :name => params[:filter_name], :description => params[:filter_description], :criteria => criteria_hash_to_query_string, :asset => controller_name)
           else
-            filter = UserFilter.find(:first, :conditions => { :user_id => @current_user.id, :id => params[:criteria_select_filter] })
+            if model.criteria_options[:restrict].blank?
+              filter = UserFilter.find(:first, :conditions => { :user_id => @current_user.id, :id => params[:criteria_select_filter] })
+            else
+              restrict = model.criteria_options[:restrict]
+              filter = UserFilter.send(:"#{restrict[:method]}", @current_user).find(:first, :conditions => { :id => params[:criteria_select_filter] })
+            end
             filter.criteria = criteria_hash_to_query_string
           end
           

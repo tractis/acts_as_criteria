@@ -7,6 +7,8 @@ class CreateUserFilters < ActiveRecord::Migration
       t.text    :criteria
       t.string  :asset
       t.integer :user_id
+      t.string  :access, :limit => 8, :default => "Private" # %w(Private Public Shared)
+      t.integer :assigned_to
       
       t.timestamps
     end
