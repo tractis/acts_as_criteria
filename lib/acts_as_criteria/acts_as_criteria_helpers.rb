@@ -169,7 +169,7 @@ module ActsAsCriteria
         restrict = model.criteria_options[:restrict]
         filters = UserFilter.send(:"#{restrict[:method]}", User.find(current_user)).find(:all, :conditions => { :asset => controller_name })
       end
-      options = filters.map{ |filter| [filter.name, id_to_criteria.blank? ? filter.id : filter.criteria] }.insert(0, acts_as_criteria_get_translation(acts_as_criteria_get_current_model, text))
+      options = filters.map{ |filter| [filter.name, id_to_criteria.blank? ? filter.id : filter.criteria] }.insert(0, [acts_as_criteria_get_translation(acts_as_criteria_get_current_model, text), ""])      
       onchange = autosubmit == true ? "document.location = '#{send("search_#{controller_name}_path")}?' + this.value" : ""
       select_tag "criteria_select_filter", options_for_select(options, 0), :onchange => onchange
     end
