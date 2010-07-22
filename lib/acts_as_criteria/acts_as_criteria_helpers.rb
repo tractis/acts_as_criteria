@@ -41,7 +41,7 @@ module ActsAsCriteria
     end
 
     def options_for_columns(filters)      
-      filters[:columns].map { |col, val| [ acts_as_criteria_get_translation(acts_as_criteria_get_current_model, val[:text]||col), col ] }.insert(0, "")
+      filters[:columns].map { |col, val| [ acts_as_criteria_get_translation(acts_as_criteria_get_current_model, val[:text]||col), col ] }.sort.insert(0, "")
     end
     
     def acts_as_criteria_get_translation(model, text)
